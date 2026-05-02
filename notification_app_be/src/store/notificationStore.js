@@ -1,20 +1,12 @@
 'use strict';
-
 /**
  * In-memory data store for notifications.
  * Simulates a database for the purposes of this evaluation.
  * In production this would be replaced with a PostgreSQL adapter.
  */
-
 const { v4: uuidv4 } = require('uuid');
-
-// Map<notificationId, { id, type, title, body, createdAt }>
 const notifications = new Map();
-
-// Map<userId_notifId, { userId, notificationId, isRead, readAt, deliveredAt }>
-// key = `${userId}::${notificationId}`
 const userNotifications = new Map();
-
 /**
  * Insert a new notification and fan-out to target students.
  * @param {string} type
@@ -27,14 +19,11 @@ const userNotifications = new Map();
 function createNotification(type, title, body, targetStudentIds, allKnownUsers) {
   const id = uuidv4();
   const now = new Date().toISOString();
-
   const notif = { id, type, title, body, createdAt: now };
   notifications.set(id, notif);
-
   const recipients = targetStudentIds.length > 0
     ? targetStudentIds
     : [...allKnownUsers];
-
   for (const userId of recipients) {
     const key = `${userId}::${id}`;
     userNotifications.set(key, {
@@ -45,10 +34,8 @@ function createNotification(type, title, body, targetStudentIds, allKnownUsers) 
       deliveredAt    : now,
     });
   }
-
   return notif;
 }
-
 /**
  * Get notifications for a specific student.
  * @param {number} userId
@@ -57,14 +44,11 @@ function createNotification(type, title, body, targetStudentIds, allKnownUsers) 
  */
 function getNotificationsForUser(userId, { page = 1, limit = 20, unreadOnly = false } = {}) {
   const rows = [];
-
   for (const [key, un] of userNotifications) {
     if (un.userId !== userId) continue;
     if (unreadOnly && un.isRead) continue;
-
     const notif = notifications.get(un.notificationId);
     if (!notif) continue;
-
     rows.push({
       notificationId : notif.id,
       type           : notif.type,
@@ -75,15 +59,11 @@ function getNotificationsForUser(userId, { page = 1, limit = 20, unreadOnly = fa
       createdAt      : notif.createdAt,
     });
   }
-
-  // Sort newest first
   rows.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
   const total  = rows.length;
   const offset = (page - 1) * limit;
   return { total, notifications: rows.slice(offset, offset + limit) };
 }
-
 /**
  * Mark a single notification as read for a user.
  * @returns {boolean} true if found, false if not
@@ -92,12 +72,10 @@ function markAsRead(userId, notificationId) {
   const key = `${userId}::${notificationId}`;
   const un  = userNotifications.get(key);
   if (!un) return false;
-
   un.isRead = true;
   un.readAt = new Date().toISOString();
   return true;
 }
-
 /**
  * Mark ALL notifications as read for a user.
  * @returns {number} count of updated records
@@ -105,7 +83,6 @@ function markAsRead(userId, notificationId) {
 function markAllAsRead(userId) {
   let count = 0;
   const now = new Date().toISOString();
-
   for (const [, un] of userNotifications) {
     if (un.userId === userId && !un.isRead) {
       un.isRead = true;
@@ -115,7 +92,6 @@ function markAllAsRead(userId) {
   }
   return count;
 }
-
 /**
  * Delete a notification (admin action).
  * @returns {boolean}
@@ -123,7 +99,6 @@ function markAllAsRead(userId) {
 function deleteNotification(notificationId) {
   if (!notifications.has(notificationId)) return false;
   notifications.delete(notificationId);
-
   for (const [key, un] of userNotifications) {
     if (un.notificationId === notificationId) {
       userNotifications.delete(key);
@@ -131,7 +106,6 @@ function deleteNotification(notificationId) {
   }
   return true;
 }
-
 /**
  * Raw notifications list for a user (for priority inbox computation).
  * @param {number} userId
@@ -147,19 +121,16 @@ function getRawNotificationsForUser(userId) {
   }
   return rows;
 }
-
 /** Expose all known user IDs */
 function getAllUserIds() {
   const ids = new Set();
   for (const [, un] of userNotifications) ids.add(un.userId);
   return ids;
 }
-
 /** Seed some initial notifications so the service is non-empty on startup */
 function seed() {
   const now   = Date.now();
   const hour  = 3600 * 1000;
-
   const seeded = [
     { type: 'placement', title: 'TCS NQT Drive — 5th May', body: 'Register by 30th April. Eligible branches: CSE, IT, ECE.', hoursAgo: 1  },
     { type: 'result',    title: 'Semester 6 Results Published', body: 'Check your portal for grade cards.', hoursAgo: 3  },
@@ -174,15 +145,11 @@ function seed() {
     { type: 'event',     title: 'Guest Lecture — Web3 & DeFi',     body: 'Online session on May 7, 3 PM.', hoursAgo: 48 },
     { type: 'placement', title: 'Cognizant GenC Evolve',           body: 'Results of earlier round released.', hoursAgo: 50 },
   ];
-
-  // Default students 1001–1010 receive all notifications
   const studentIds = [1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010];
-
   for (const s of seeded) {
     const id        = uuidv4();
     const createdAt = new Date(now - s.hoursAgo * hour).toISOString();
     notifications.set(id, { id, type: s.type, title: s.title, body: s.body, createdAt });
-
     for (const uid of studentIds) {
       const key = `${uid}::${id}`;
       userNotifications.set(key, {
@@ -195,9 +162,7 @@ function seed() {
     }
   }
 }
-
 seed();
-
 module.exports = {
   createNotification,
   getNotificationsForUser,
