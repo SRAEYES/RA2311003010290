@@ -1,0 +1,17 @@
+{
+  "name": "notification-app-be",
+  "version": "1.0.0",
+  "description": "Campus Notification Backend Microservice — Stage 6 implementation",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "node --watch src/app.js",
+    "test": "node tests/notification.test.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "uuid": "^9.0.0"
+  },
+  "keywords": [],
+  "license": "ISC"
+}
