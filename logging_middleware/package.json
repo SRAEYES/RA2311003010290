@@ -1,0 +1,11 @@
+{
+  "name": "logging-middleware",
+  "version": "1.0.0",
+  "description": "Reusable logging middleware for campus evaluation",
+  "main": "index.js",
+  "scripts": {
+    "test": "node tests/logging.test.js"
+  },
+  "keywords": [],
+  "license": "ISC"
+}
