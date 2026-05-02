@@ -17,7 +17,7 @@ const http  = require('http');
 const https = require('https');
 const path  = require('path');
 const { Log, createLogger } = require(path.join(__dirname, '..', 'logging_middleware'));
-const BASE_URL    = 'http:
+const BASE_URL    = 'http://20.207.122.201/evaluation-service';
 const AUTH_TOKEN  = process.env.AUTH_TOKEN || '';
 const logger = createLogger('backend', 'service');
 function getJSON(url, token) {

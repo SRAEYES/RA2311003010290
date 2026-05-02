@@ -31,8 +31,8 @@ app.use(async (err, req, res, _next) => {
 });
 app.listen(PORT, async () => {
   await Log('backend', 'info', 'config', `Notification service started on port ${PORT}`);
-  console.log(`\n🚀 Notification Backend running at http:
-  console.log(`   Health: http:
-  console.log(`   API:    http:
+  console.log(`\n🚀 Notification Backend running at http://localhost:${PORT}`);
+  console.log(`   Health: http://localhost:${PORT}/health`);
+  console.log(`   API:    http://localhost:${PORT}/api/notifications\n`);
 });
 module.exports = app; 

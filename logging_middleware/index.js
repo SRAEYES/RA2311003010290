@@ -11,7 +11,7 @@
  */
 const https = require('https');
 const http = require('http');
-const LOG_API_URL = process.env.LOG_API_URL || 'http:
+const LOG_API_URL = process.env.LOG_API_URL || 'http://20.207.122.201/evaluation-service/logs';
 const AUTH_TOKEN  = process.env.AUTH_TOKEN  || '';   
 const VALID_STACKS = new Set(['backend', 'frontend']);
 const VALID_LEVELS = new Set(['debug', 'info', 'warn', 'error', 'fatal']);
